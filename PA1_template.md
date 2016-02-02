@@ -11,7 +11,7 @@ library(dplyr)
 library(ggplot2)
 ```
 
-Second, read the data from the zip file in this repository. Convert the date field to the necessary date format. Viewing this data, we can see the number of rows and ascertain that the date conversion has worked correctly:
+Second, read the data from the zip file in this repository. Convert the date field to the necessary date format. If we print the str of this data frame, we can see the number of rows and ascertain that the date conversion has worked correctly:
 ```{r echo=TRUE}
 unzip("activity.zip")
 activity<-read.csv("activity.csv")
@@ -36,10 +36,13 @@ act_by_date
 
 Create a plot of Date x Steps. I have made the fill of the histogram become lighter the higher the number of steps to quickly pull high and low values:
 ```{r echo=TRUE}
+png(filename="steps_per_day.png",width=800,height=480)
 ggplot(act_by_date,aes(x=Date,y=Steps))+
         geom_histogram(stat="identity",aes(fill=Steps))+
         labs(title="How many total steps were taken per day?")
+dev.off()
 ```
+![alt text](https://github.com/macavaney/RepData_PeerAssessment1/PA1_template.md/raw/master/src/common/images/steps_per_day.png "Total steps per day")
 
 #### 3) Calculate and return the mean and median of total steps per day
 
