@@ -11,10 +11,8 @@ library(dplyr)
 library(ggplot2)
 ```
 
-Second, download and read the data. Convert the date field to the necessary date format. Viewing this data, we can see the number of rows and ascertain that the date conversion has worked correctly:
+Second, read the data from the zip file in this repository. Convert the date field to the necessary date format. Viewing this data, we can see the number of rows and ascertain that the date conversion has worked correctly:
 ```{r}
-download.file("https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip",
-              destfile="activity.zip")
 unzip("activity.zip")
 activity<-read.csv("activity.csv")
 activity$date<-as.Date(activity$date,"%Y-%m-%d")
