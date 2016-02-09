@@ -5,13 +5,17 @@ keep_md: true
 ---
 ## Loading and preprocessing the data
 
-First, call on the two libraries we will use for the remainder of the analysis:
+First, set global options for the markdown file:
+``` {r setoptions,background="9CD2D8",echo=TRUE,include=TRUE,fig.show="asis",fig.height=6,fig.width=7}
+```
+
+Second, call on the two libraries we will use for the remainder of the analysis:
 ```{r}
 library(dplyr)
 library(ggplot2)
 ```
 
-Second, read the data from the zip file in this repository. Convert the date field to the necessary date format. Viewing this data, we can see the number of rows is 17568 as described, and we can ascertain that the date conversion has worked correctly:
+Finally, read the data from the zip file in this repository. Convert the date field to the necessary date format. Viewing this data, we can see the number of rows and ascertain that the date conversion has worked correctly:
 ```{r}
 unzip("activity.zip")
 activity<-read.csv("activity.csv")
@@ -34,18 +38,16 @@ act_by_date
 
 #### 2) Create histogram based on total steps per day
 
-Create a plot of Date x Steps. This png is stored in the instructions_fig folder and is named per below code. I have made the fill of the histogram become lighter the higher the number of steps to quickly pull high and low values:
+Create a plot of Date x Steps. I have made the fill of the histogram become lighter the higher the number of steps to quickly pull high and low values:
 ```{r}
-png(filename="Total_steps_per_day.png",width=800,height=480)
 ggplot(act_by_date,aes(x=Date,y=Steps))+
         geom_histogram(stat="identity",aes(fill=Steps))+
         labs(title="How many total steps were taken per day?")
-dev.off()
 ```
 
 #### 3) Calculate and return the mean and median of total steps per day
 
-Running this code returns the mean and median of the Steps column of the data frame. Mean returns 9354.23 and median returns 10395:
+Return mean and median of the Steps column of the data frame:
 ```{r}
 mean(act_by_date$Steps)
 median(act_by_date$Steps)
@@ -64,18 +66,16 @@ names(steps_by_int)<-c("Interval","Steps")
 steps_by_int
 ```
 
-Second, make the line graph based on this grouped data frame. This png is stored in the instructions_fig folder and is named per below code:
+Second, make the line graph based on this grouped data frame:
 ```{r}
-png(filename="Avg_steps_by_interval.png",width=480,height=480)
 ggplot(steps_by_int,aes(x=Interval,y=Steps))+
         geom_line(stat="identity")+
         labs(y="Average steps",title="What is the average step count by interval?")
-dev.off()
 ```
 
 #### 2) Which 5-minute interval contains the maximum number of steps?
 
-Calculate and return the interval with the greatest number of steps. If you run this function, it returns the interval (835) as well as the number of steps (206.1698) that is that maximum number. Based on the peak value of the previous line graph, this seems accurate:
+Calculate and return the interval with the greatest number of steps. This function also returns the number of steps that is that maximum number. Based on the peak of the previous line graph, this average step count seems accurate:
 ```{r}
 top_n(steps_by_int,1,Steps)
 ```
@@ -84,18 +84,19 @@ top_n(steps_by_int,1,Steps)
 
 #### 1) Calculate and report the total number of missing values
 
-If you run this code, you can see that the "steps" field is the only one with missing values. The total number of NAs in "steps" is 2304:
+I believe only the "steps" field has missing values, but we will check to make sure:
 ```{r}
 sum(is.na(activity$steps))
 sum(is.na(activity$date))
 sum(is.na(activity$interval))
 ```
+Looks like "steps" is the only field with NAs. This will be useful as we create a function to impute new values.
 
 #### 2) Devise a strategy for filling in all the missing values in the dataset; create a new dataset with the missing values filled in
 
 I am going to use average step count by interval because I feel that will be the most accurate info to impute (based on the previous graph "What is the average step count by interval?", there are extremely few steps taken from intervals 0-500, and it would be foolish to simply insert the average step count across all intervals into those NAs). 
 
-The mutate and ifelse functions are used to replace NA values with average step count by interval number. If you then run is.na, you can see that this function worked and there are no NA values:
+The mutate and ifelse functions are used to replace NA values with average step count by interval number. Using is.na, we can see that this function worked and there are no NA values:
 ```{r}
 imputed<-activity%>%
         group_by(interval)%>%
@@ -105,26 +106,28 @@ sum(is.na(imputed$steps))
 
 #### 3) Make a histogram of the total steps taken each day; calculate mean and median of total steps taken per day. Do the values differ from the first part of the assignment, and what is the impact of imputing missing data?
 
-First, create a histogram of total steps taken each day. To do an apt comparison, I am using the same formatting as the previous histogram (without imputed data). This png is stored in the instructions_fig folder and is named per below code:
+First, create a histogram of total steps taken each day. To do an apt comparison, I am using the same formatting as the previous histogram (without imputed data):
 ```{r}
 imputed_by_date<-imputed%>%
         group_by(date)%>%
         summarize(sum(steps))
 names(imputed_by_date)<-c("Date","Steps")
-png(filename="Steps_by_day_imputed.png",width=800,height=480)
+```
+
+Here is the histogram:
+```{r}
 ggplot(imputed_by_date,aes(x=Date,y=Steps))+
         geom_histogram(stat="identity",aes(fill=Steps))+
         labs(title="How many total steps were taken per day (using imputed data)?")
-dev.off()
 ```
 
-Second, return the mean and median of total steps taken per day. If you run this code, you can see that both the mean and the median return a value of 10766.19:
+Second, return the mean and median of total steps taken per day:
 ```{r}
 mean(imputed_by_date$Steps)
 median(imputed_by_date$Steps)
 ```
 
-If you return the percentage difference between the mean imputed step count and non-imputed step count, you can see that there is a 13.115% difference between the imputed mean and the actual mean, and a 3.448% difference between the imputed median and the actual median:
+Finally, return the percentage difference between the mean imputed step count and non-imputed step count:
 ```{r}
 sum((mean(imputed_by_date$Steps)-mean(act_by_date$Steps))/mean(imputed_by_date$Steps))
 sum((median(imputed_by_date$Steps)-median(act_by_date$Steps))/median(imputed_by_date$Steps))
@@ -140,7 +143,7 @@ Based on these findings, I would conclude that it's perfectly accurate to impute
 
 #### 1) Create a new factor variable in the dataset for weekends vs weekdays
 
-This is done using mutate and ifelse. To prepare to make a graph, I've further grouped and summarized the data based on type and interval. If you view this table data frame, you can see the number of rows is 576 (double the initial interval count of 288):
+This is done using mutate and ifelse. To prepare to make a graph, I've further grouped and summarized the data based on type and interval. As we can see by viewing the data, the number of rows is 576 (double the initial interval count of 288):
 ```{r}
 act_daytypes<-activity%>%
         mutate(type=ifelse(weekdays(date)=="Saturday"|
@@ -154,16 +157,14 @@ act_daytypes
 
 #### 2) Make a panel plot containing the avg number of steps per 5 minute interval, by weekend vs weekday
 
-To compare this to the previous line graph, I am using similar formatting. This png is stored in the instructions_fig folder and is named per below code:
+To compare this to the previous line graph, I am using similar formatting:
 ```{r}
 par(mfrow=c(2,1),mar=c(4,4,4,2))
-png(filename="Weekday_vs_weekend.png",width=800,height=800)
 ggplot(act_daytypes,aes(x=Interval,y=Steps))+
         geom_line(stat="identity")+
         facet_grid(Type~.)+
         labs(y="Average steps",
              title="What is the average step count by interval (weekday vs weekend)?")
-dev.off()
 ```
 
 To answer this question, yes there are some distinct differences. This subject clearly has routines based on weekend vs weekday. I'd guess s/he has a desk job based on high levels of inactivity between two main peaks in the morning and evening, and is generally active during the weekend.
